@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/master-project-with-lib
+    docker:
+      - image: angular/ngcontainer
+    steps:
+      - checkout
+      - restore_cache:
+          key: master-project-with-lib-{{ .Branch }}-{{ checksum "yarn.lock" }}
+      - run: yarn --frozen-lockfile
+      - save_cache:
+          key: master-project-with-lib-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          paths:
+            - "node_modules"
+      - run: xvfb-run -a yarn test -- --single-run --no-progress
+      - run: xvfb-run -a yarn e2e -- --no-progress
+      - run: yarn build-lib
